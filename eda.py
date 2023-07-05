@@ -1,32 +1,18 @@
-# [clone libraries]
 import requests
 import subprocess
-# import git
-
-# [pandas and file handling libraries]
 import pandas as pd
-import os
-import json
-
-# [SQL libraries]
 import mysql.connector
 import sqlalchemy
 from sqlalchemy import create_engine
+import os
+import json
 
 # "C:\Users\Mouli\Desktop\New folder"
-#Specify the GitHub repository URL
 response = requests.get('https://api.github.com/repos/PhonePe/pulse')
 repo = response.json()
 clone_url = repo['clone_url']
-
-#Specify the local directory path
 clone_dir = "C:/Users/Mouli/Desktop/guvi/phonepe"
-
-# Clone the repository to the specified local directory
 subprocess.run(["git", "clone", clone_url, clone_dir], check=True)
-
-#==============================     DATA     /     AGGREGATED     /     TRANSACTION     ===================================#
-# 1
 
 path_1 = "C:/Users/Mouli/Desktop/guvi/phonepe/data/aggregated/transaction/country/india/state/"
 Agg_tran_state_list = os.listdir(path_1)
@@ -58,10 +44,6 @@ for i in Agg_tran_state_list:
                 Agg_tra['Transaction_amount'].append(amount)
                 
 df_aggregated_transaction = pd.DataFrame(Agg_tra)
-print(df_aggregated_transaction)
-
-#==============================     DATA     /     AGGREGATED     /     USER     ===================================#
-# 2
 
 path_2 = "C:/Users/Mouli/Desktop/guvi/phonepe/data/aggregated/user/country/india/state/"
 Agg_user_state_list = os.listdir(path_2)
@@ -97,9 +79,6 @@ for i in Agg_user_state_list:
 
 df_aggregated_user = pd.DataFrame(Agg_user)
 
-#==============================     DATA     /     MAP     /     TRANSACTION     =========================================#
-# 3
-
 path_3 = "C:/Users/Mouli/Desktop/guvi/phonepe/data/map/transaction/hover/country/india/state/"
 map_tra_state_list = os.listdir(path_3)
 
@@ -131,9 +110,6 @@ for i in map_tra_state_list:
                 
 df_map_transaction = pd.DataFrame(map_tra)
 
-#==============================         DATA     /     MAP     /     USER         ============================================#
-# 4
-
 path_4 = "C:/Users/Mouli/Desktop/guvi/phonepe/data/map/user/hover/country/india/state/"
 map_user_state_list = os.listdir(path_4)
 
@@ -162,9 +138,6 @@ for i in map_user_state_list:
                 map_user["Registered_User"].append(registereduser)
                 
 df_map_user = pd.DataFrame(map_user)
-
-#==============================     DATA     /     TOP     /     TRANSACTION     =========================================#
-# 5
 
 path_5 = "C:/Users/Mouli/Desktop/guvi/phonepe/data/top/transaction/country/india/state/"
 top_tra_state_list = os.listdir(path_5)
@@ -197,8 +170,6 @@ for i in top_tra_state_list:
 
 df_top_transaction = pd.DataFrame(top_tra)
 
-#==============================     DATA     /     TOP     /     USER     ============================================#
-# 6
 
 path_6 = "C:/Users/Mouli/Desktop/guvi/phonepe/data/top/user/country/india/state/"
 top_user_state_list = os.listdir(path_6)
@@ -229,7 +200,6 @@ for i in top_user_state_list:
                 
 df_top_user = pd.DataFrame(top_user)
 
-# Connect to the MySQL server
 mydb = mysql.connector.connect(
   host = "localhost",
   user = "root",
@@ -237,20 +207,14 @@ mydb = mysql.connector.connect(
   auth_plugin = "mysql_native_password"
 )
 
-# Create a new database and use
 mycursor = mydb.cursor()
 mycursor.execute("CREATE DATABASE IF NOT EXISTS phonepe_pulse")
 
-# Close the cursor and database connection
 mycursor.close()
 mydb.close()
 
-# Connect to the new created database
 engine = create_engine('mysql+mysqlconnector://root:1234@localhost/phonepe_pulse', echo=False)
 
-# Use pandas to insert the DataFrames datas to the SQL Database -> table1
-
-# 1
 df_aggregated_transaction.to_sql('aggregated_transaction', engine, if_exists = 'replace', index=False,   
                                  dtype={'State': sqlalchemy.types.VARCHAR(length=50), 
                                        'Year': sqlalchemy.types.Integer, 
@@ -258,7 +222,7 @@ df_aggregated_transaction.to_sql('aggregated_transaction', engine, if_exists = '
                                        'Transaction_type': sqlalchemy.types.VARCHAR(length=50), 
                                        'Transaction_count': sqlalchemy.types.Integer,
                                        'Transaction_amount': sqlalchemy.types.FLOAT(precision=5, asdecimal=True)})
-# 2
+
 df_aggregated_user.to_sql('aggregated_user', engine, if_exists = 'replace', index=False,
                           dtype={'State': sqlalchemy.types.VARCHAR(length=50), 
                                  'Year': sqlalchemy.types.Integer, 
@@ -266,7 +230,7 @@ df_aggregated_user.to_sql('aggregated_user', engine, if_exists = 'replace', inde
                                  'Brands': sqlalchemy.types.VARCHAR(length=50), 
                                  'User_Count': sqlalchemy.types.Integer, 
                                  'User_Percentage': sqlalchemy.types.FLOAT(precision=5, asdecimal=True)})
-# 3                       
+                     
 df_map_transaction.to_sql('map_transaction', engine, if_exists = 'replace', index=False,
                           dtype={'State': sqlalchemy.types.VARCHAR(length=50), 
                                  'Year': sqlalchemy.types.Integer, 
@@ -274,14 +238,14 @@ df_map_transaction.to_sql('map_transaction', engine, if_exists = 'replace', inde
                                  'District': sqlalchemy.types.VARCHAR(length=50), 
                                  'Transaction_Count': sqlalchemy.types.Integer, 
                                  'Transaction_Amount': sqlalchemy.types.FLOAT(precision=5, asdecimal=True)})
-# 4
+
 df_map_user.to_sql('map_user', engine, if_exists = 'replace', index=False,
                    dtype={'State': sqlalchemy.types.VARCHAR(length=50), 
                           'Year': sqlalchemy.types.Integer, 
                           'Quater': sqlalchemy.types.Integer, 
                           'District': sqlalchemy.types.VARCHAR(length=50), 
                           'Registered_User': sqlalchemy.types.Integer, })
-# 5                  
+            
 df_top_transaction.to_sql('top_transaction', engine, if_exists = 'replace', index=False,
                          dtype={'State': sqlalchemy.types.VARCHAR(length=50), 
                                 'Year': sqlalchemy.types.Integer, 
@@ -289,7 +253,7 @@ df_top_transaction.to_sql('top_transaction', engine, if_exists = 'replace', inde
                                 'District_Pincode': sqlalchemy.types.Integer,
                                 'Transaction_count': sqlalchemy.types.Integer, 
                                 'Transaction_amount': sqlalchemy.types.FLOAT(precision=5, asdecimal=True)})
-# 6
+
 df_top_user.to_sql('top_user', engine, if_exists = 'replace', index=False,
                    dtype={'State': sqlalchemy.types.VARCHAR(length=50), 
                           'Year': sqlalchemy.types.Integer, 
@@ -297,10 +261,6 @@ df_top_user.to_sql('top_user', engine, if_exists = 'replace', index=False,
                           'District_Pincode': sqlalchemy.types.Integer, 
                           'Registered_User': sqlalchemy.types.Integer,})
 
-
-
-# #  =============     CONNECT SQL SERVER  /   CREAT DATA BASE    /  CREAT TABLE    /    STORE DATA    ========  #
-# import sqlite3
 # from sqlalchemy import create_engine
 # import sqlalchemy.types
 
@@ -431,7 +391,3 @@ df_top_user.to_sql('top_user', engine, if_exists = 'replace', index=False,
 
 # # Close the connection to the SQLite database
 # conn.close()
-
-
-
-# =========================================================================================================================================== #
